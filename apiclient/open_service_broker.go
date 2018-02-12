@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/pivotal-cf/brokerapi"
+	edenstore "github.com/starkandwayne/eden/store"
 )
 
 // OpenServiceBroker is the client struct for connecting to remote Open Service Broker API
@@ -64,8 +65,8 @@ func (broker *OpenServiceBroker) Catalog() (catalogResp *brokerapi.CatalogRespon
 }
 
 // Provision attempts to provision a new service instance
-func (broker *OpenServiceBroker) Provision(serviceID, planID, instanceID string) (provisioningResp *brokerapi.ProvisioningResponse, isAsync bool, err error) {
-	url := fmt.Sprintf("%s/v2/service_instances/%s?accepts_incomplete=true", broker.url, instanceID)
+func (broker *OpenServiceBroker) Provision(serviceID, planID, instanceID, instanceName string) (provisioningResp *brokerapi.ProvisioningResponse, isAsync bool, err error) {
+	url := fmt.Sprintf("%s/v2/service_instances/%s?accepts_incomplete=true", broker.url, instanceName)
 	details := brokerapi.ProvisionDetails{
 		ServiceID:        serviceID,
 		PlanID:           planID,
@@ -280,4 +281,35 @@ func (broker *OpenServiceBroker) FindPlanByNameOrID(service *brokerapi.Service, 
 		}
 	}
 	return nil, fmt.Errorf("No plan has name or ID '%s' within service '%s'", nameOrID, service.Name)
+}
+
+func (broker *OpenServiceBroker) ListServiceInstances() (instances []edenstore.FSServiceInstance, err error) {
+	url := fmt.Sprintf("%s/v2/service_instances", broker.url)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, errwrap.Wrapf("Cannot construct HTTP request: {{err}}", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Broker-Api-Version", broker.apiVersion)
+	req.SetBasicAuth(broker.username, broker.password)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, errwrap.Wrapf("Failed doing HTTP request: {{err}}", err)
+	}
+	defer resp.Body.Close()
+
+	resBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, errwrap.Wrapf("Failed reading HTTP response body: {{err}}", err)
+	}
+
+	instanceList := []edenstore.FSServiceInstance{}
+	err = json.Unmarshal(resBody, &instanceList)
+	if err != nil {
+		return nil, errwrap.Wrapf("Failed unmarshalling catalog response: {{err}}", err)
+	}
+
+	return instanceList, nil
 }

@@ -5,6 +5,8 @@ import (
 	"os"
 
 	boshtbl "github.com/cloudfoundry/bosh-cli/ui/table"
+	"github.com/starkandwayne/eden/apiclient"
+	edenstore "github.com/starkandwayne/eden/store"
 )
 
 // ServicesOpts represents the 'services' command
@@ -21,6 +23,11 @@ func (c ServicesOpts) Execute(_ []string) (err error) {
 }
 
 func (c ServicesOpts) showAllServices() (err error) {
+	instances, err := c.listServiceInstances()
+	if err != nil {
+		return fmt.Errorf("Failed to lookup service instances: %s", err)
+	}
+
 	table := boshtbl.Table{
 		Content: "services",
 
@@ -37,7 +44,6 @@ func (c ServicesOpts) showAllServices() (err error) {
 		},
 	}
 
-	instances := Opts.config().ServiceInstances()
 	for _, inst := range instances {
 		bindingName := "n/a"
 		if len(inst.Bindings) > 0 {
@@ -57,10 +63,23 @@ func (c ServicesOpts) showAllServices() (err error) {
 }
 
 func (c ServicesOpts) showService(instanceNameOrID string) (err error) {
-	inst := Opts.config().FindServiceInstance(instanceNameOrID)
-	if inst.ServiceID == "" {
+	instances, err := c.listServiceInstances()
+	if err != nil {
+		return fmt.Errorf("Failed to lookup service instances: %s", err)
+	}
+
+	var inst *edenstore.FSServiceInstance
+
+	for _, instance := range instances {
+		if instance.Name == instanceNameOrID || instance.ID == instanceNameOrID {
+			inst = &instance
+		}
+	}
+
+	if inst == nil {
 		return fmt.Errorf("services --instance '%s' was not found", instanceNameOrID)
 	}
+
 	fmt.Printf("Instance Name: %s\n", inst.Name)
 	fmt.Printf("Service/Plan:  %s/%s\n", inst.ServiceName, inst.PlanName)
 	if len(inst.Bindings) > 0 {
@@ -71,5 +90,17 @@ func (c ServicesOpts) showService(instanceNameOrID string) (err error) {
 	} else {
 		fmt.Println("No bindings.")
 	}
-	return
+
+	return nil
+}
+
+func (c ServicesOpts) listServiceInstances() ([]edenstore.FSServiceInstance, error) {
+	broker := apiclient.NewOpenServiceBroker(
+		Opts.Broker.URLOpt,
+		Opts.Broker.ClientOpt,
+		Opts.Broker.ClientSecretOpt,
+		Opts.Broker.APIVersion,
+	)
+
+	return broker.ListServiceInstances()
 }

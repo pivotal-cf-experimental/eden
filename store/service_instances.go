@@ -22,15 +22,15 @@ type FSServiceInstances struct {
 }
 
 type FSServiceInstance struct {
-	ID          string             `yaml:"id"`
-	Name        string             `yaml:"name"`
-	ServiceID   string             `yaml:"service_id"`
-	ServiceName string             `yaml:"service_name"`
-	PlanID      string             `yaml:"plan_id"`
-	PlanName    string             `yaml:"plan_name"`
-	BrokerURL   string             `yaml:"broker_url"`
-	Bindings    []fsServiceBinding `yaml:"bindings"`
-	CreatedAt   time.Time          `yaml:"created_at"`
+	ID          string             `json:"id"`
+	Name        string             `json:"name"`
+	ServiceID   string             `json:"service_id"`
+	ServiceName string             `json:"service_name"`
+	PlanID      string             `json:"plan_id"`
+	PlanName    string             `json:"plan_name"`
+	BrokerURL   string             `json:"broker_url"`
+	Bindings    []fsServiceBinding `json:"bindings"`
+	CreatedAt   time.Time          `json:"created_at"`
 }
 
 // ServiceBinding represents a binding with credentials
