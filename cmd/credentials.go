@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/errwrap"
+	"github.com/starkandwayne/eden/apiclient"
 )
 
 // CredentialsOpts represents the 'credentials' command
@@ -21,24 +22,19 @@ func (c CredentialsOpts) Execute(_ []string) (err error) {
 	if instanceNameOrID == "" {
 		return fmt.Errorf("credentials command requires --instance [NAME|GUID], or $SB_INSTANCE")
 	}
-	inst := Opts.config().FindServiceInstance(instanceNameOrID)
-	if inst.ServiceID == "" {
-		return fmt.Errorf("credentials --instance '%s' was not found", instanceNameOrID)
-	}
-	if len(inst.Bindings) > 0 {
-		binding := inst.Bindings[0]
 
-		// convert binding.Credentials into nested map[string]map[string]interface{}
-		credentialsJSON, err := binding.CredentialsJSON()
-		if err != nil {
-			return err
-		}
-		if err := c.displayBinding(credentialsJSON, c.Attribute); err != nil {
-			return err
-		}
-	} else {
-		fmt.Println("No bindings.")
-	}
+	broker := apiclient.NewOpenServiceBroker(
+		Opts.Broker.URLOpt,
+		Opts.Broker.ClientOpt,
+		Opts.Broker.ClientSecretOpt,
+		Opts.Broker.APIVersion,
+	)
+
+	bindings, err := broker.GetBindingsByServiceInstanceID(instanceNameOrID)
+
+	fmt.Println("")
+	fmt.Println(bindings)
+	fmt.Println("")
 	return
 }
 

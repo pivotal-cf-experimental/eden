@@ -3,6 +3,7 @@ package apiclient
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -52,7 +53,7 @@ func (broker *OpenServiceBroker) Catalog() (catalogResp *brokerapi.CatalogRespon
 
 		resBody, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return nil, errwrap.Wrapf("Failed reading HTTP response body: {{err}}", err)
+			return nil, errwrap.Wrapf("Couldn't rest response body: {{err}}", err)
 		}
 
 		broker.catalog = &brokerapi.CatalogResponse{}
@@ -99,6 +100,7 @@ func (broker *OpenServiceBroker) Provision(serviceID, planID, instanceID, instan
 		return nil, false, errwrap.Wrapf("Failed reading HTTP response body: {{err}}", err)
 	}
 	provisioningResp = &brokerapi.ProvisioningResponse{}
+
 	err = json.Unmarshal(resBody, provisioningResp)
 	if err != nil {
 		return nil, false, errwrap.Wrapf("Failed unmarshalling provisioning response: {{err}}", err)
@@ -109,7 +111,7 @@ func (broker *OpenServiceBroker) Provision(serviceID, planID, instanceID, instan
 		isAsync = false
 	} else {
 		errorResp := &brokerapi.ErrorResponse{}
-		err = json.Unmarshal(resBody, provisioningResp)
+		err = json.Unmarshal(resBody, errorResp)
 		if err != nil {
 			return nil, false, errwrap.Wrapf("Failed unmarshalling error response: {{err}}", err)
 		}
@@ -206,6 +208,7 @@ func (broker *OpenServiceBroker) Deprovision(serviceID, planID, instanceID strin
 
 	resBody, err := ioutil.ReadAll(resp.Body)
 	json.Unmarshal(resBody, deprovisioningResp)
+	fmt.Printf("%+v", string(resBody))
 
 	if err != nil {
 		isAsync = false
@@ -348,4 +351,34 @@ func (broker *OpenServiceBroker) GetServiceInstance(instanceID string) (edenstor
 	}
 
 	return instance, nil
+}
+
+func (broker *OpenServiceBroker) GetBindingsByServiceInstanceID(instanceID string) (string, error) {
+	url := fmt.Sprintf("%s/v2/service_instances/%s/service_bindings", broker.url, instanceID)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return "", errwrap.Wrapf("Cannot construct HTTP request: {{err}}", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Broker-Api-Version", broker.apiVersion)
+	req.SetBasicAuth(broker.username, broker.password)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+
+	if resp.StatusCode == http.StatusNotFound {
+		return "", errors.New("Service instance not found")
+	}
+
+	if err != nil {
+		return "", errwrap.Wrapf("Failed doing HTTP request: {{err}}", err)
+	}
+	defer resp.Body.Close()
+
+	resBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", errwrap.Wrapf("Failed reading HTTP response body: {{err}}", err)
+	}
+
+	return string(resBody), nil
 }

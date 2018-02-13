@@ -18,7 +18,6 @@ func (c BindOpts) Execute(_ []string) (err error) {
 	if instanceNameOrID == "" {
 		return fmt.Errorf("bind command requires --instance [NAME|GUID], or $SB_INSTANCE")
 	}
-	instance := Opts.config().FindServiceInstance(instanceNameOrID)
 
 	broker := apiclient.NewOpenServiceBroker(
 		Opts.Broker.URLOpt,
@@ -26,6 +25,11 @@ func (c BindOpts) Execute(_ []string) (err error) {
 		Opts.Broker.ClientSecretOpt,
 		Opts.Broker.APIVersion,
 	)
+
+	instance, err := broker.GetServiceInstance(instanceNameOrID)
+	if err != nil {
+		return errwrap.Wrapf("Failed to get service instance {{err}}", err)
+	}
 
 	bindingID := uuid.New()
 	bindingName := fmt.Sprintf("%s-%s", instance.ServiceName, bindingID)
@@ -35,12 +39,10 @@ func (c BindOpts) Execute(_ []string) (err error) {
 	if err != nil {
 		return errwrap.Wrapf("Failed to bind to service instance {{err}}", err)
 	}
-	err = Opts.config().BindServiceInstance(instance.ID, bindingID, bindingName, bindingResp.Credentials)
-	if err != nil {
-		return errwrap.Wrapf("Failed to store binding {{err}}", err)
-	}
 
 	fmt.Println("Success")
+	fmt.Println("")
+	fmt.Printf("Created binding:\n\n%+v", bindingResp)
 	fmt.Println("")
 	fmt.Printf("Run 'eden credentials -i %s -b %s' to see credentials\n", instance.Name, bindingName)
 	return
