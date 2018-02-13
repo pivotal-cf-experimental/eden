@@ -16,11 +16,10 @@ type DeprovisionOpts struct {
 
 // Execute is callback from go-flags.Commander interface
 func (c DeprovisionOpts) Execute(_ []string) (err error) {
-  instanceNameOrID := Opts.Instance.NameOrID
-  if instanceNameOrID == "" {
-    return fmt.Errorf("deprovision command requires --instance [NAME|GUID], or $SB_INSTANCE")
-  }
-	instance := Opts.config().FindServiceInstance(instanceNameOrID)
+	instanceNameOrID := Opts.Instance.NameOrID
+	if instanceNameOrID == "" {
+		return fmt.Errorf("deprovision command requires --instance [NAME|GUID], or $SB_INSTANCE")
+	}
 
 	broker := apiclient.NewOpenServiceBroker(
 		Opts.Broker.URLOpt,
@@ -28,6 +27,12 @@ func (c DeprovisionOpts) Execute(_ []string) (err error) {
 		Opts.Broker.ClientSecretOpt,
 		Opts.Broker.APIVersion,
 	)
+
+	instance, err := broker.GetServiceInstance(instanceNameOrID)
+	if err != nil {
+		return errwrap.Wrapf("Failed to deprovision service instance {{err}}", err)
+	}
+
 	resp, isAsync, err := broker.Deprovision(instance.ServiceID, instance.PlanID, instance.ID)
 	if err != nil {
 		return errwrap.Wrapf("Failed to deprovision service instance {{err}}", err)

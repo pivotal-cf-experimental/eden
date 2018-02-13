@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/errwrap"
-	"github.com/pborman/uuid"
 	"github.com/pivotal-cf/brokerapi"
 	"github.com/starkandwayne/eden/apiclient"
 )
@@ -36,16 +35,13 @@ func (c ProvisionOpts) Execute(_ []string) (err error) {
 	}
 
 	instanceName := Opts.Instance.NameOrID
-	instanceID := uuid.New()
-	if instanceName == "" {
-		instanceName = fmt.Sprintf("%s-%s-%s", service.Name, plan.Name, instanceID)
-	}
+
 	prexisting := Opts.config().FindServiceInstance(instanceName)
 	if prexisting.ServiceName != "" {
 		return fmt.Errorf("Service instance '%s' already exists", instanceName)
 	}
 
-	provisioningResp, isAsync, err := broker.Provision(service.ID, plan.ID, instanceID, instanceName)
+	provisioningResp, isAsync, err := broker.Provision(service.ID, plan.ID, instanceName, instanceName)
 	if err != nil {
 		return errwrap.Wrapf("Failed to provision service instance: {{err}}", err)
 	}
@@ -57,7 +53,7 @@ func (c ProvisionOpts) Execute(_ []string) (err error) {
 		lastOpResp := &brokerapi.LastOperationResponse{State: brokerapi.InProgress}
 		for lastOpResp.State == brokerapi.InProgress {
 			time.Sleep(5 * time.Second)
-			lastOpResp, err = broker.LastOperation(service.ID, plan.ID, instanceID, provisioningResp.OperationData)
+			lastOpResp, err = broker.LastOperation(service.ID, plan.ID, instanceName, provisioningResp.OperationData)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err.Error())
 				os.Exit(1)

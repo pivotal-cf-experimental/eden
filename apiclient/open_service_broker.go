@@ -313,3 +313,39 @@ func (broker *OpenServiceBroker) ListServiceInstances() (instances []edenstore.F
 
 	return instanceList, nil
 }
+
+func (broker *OpenServiceBroker) GetServiceInstance(instanceID string) (edenstore.FSServiceInstance, error) {
+	var instance edenstore.FSServiceInstance
+	url := fmt.Sprintf("%s/v2/service_instances/%s", broker.url, instanceID)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return instance, errwrap.Wrapf("Cannot construct HTTP request: {{err}}", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Broker-Api-Version", broker.apiVersion)
+	req.SetBasicAuth(broker.username, broker.password)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+
+	if resp.StatusCode == http.StatusNotFound {
+		return instance, errors.New("Service instance not found")
+	}
+
+	if err != nil {
+		return instance, errwrap.Wrapf("Failed doing HTTP request: {{err}}", err)
+	}
+	defer resp.Body.Close()
+
+	resBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return instance, errwrap.Wrapf("Failed reading HTTP response body: {{err}}", err)
+	}
+
+	err = json.Unmarshal(resBody, &instance)
+	if err != nil {
+		return instance, errwrap.Wrapf("Failed unmarshalling catalog response: {{err}}", err)
+	}
+
+	return instance, nil
+}
