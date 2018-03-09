@@ -8,7 +8,7 @@ Provides a CF-like workflow (provision/bind/unbind/deprovision with no state sto
 ## Installation
 
 ```
-go get -u gopkg.in/pivotal-cf-experimental/eden.spike-services-controller-client
+go get -u gopkg.in/pivotal-cf-experimental/eden.v1
 ```
 
 
@@ -18,8 +18,8 @@ Use environment variables to target your topham-controller server:
 
 ```
 export SB_BROKER_URL=https://topham-controller.com
-export SB_BROKER_USERNAME=username
-export SB_BROKER_PASSWORD=password
+export SB_BROKER_USERNAME=topham-username
+export SB_BROKER_PASSWORD=topham-password
 ```
 
 To see the available services and plans:
