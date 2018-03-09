@@ -1,41 +1,23 @@
-# eden
+# eden for [topham](https://github.com/pivotal-cf-experimental/topham-controller)
 
-Interact with any Open Service Broker API to discover/provision/bind/unbind/deprovision hundreds of different services.
+A fork of eden, modified to store no state locally, and instead rely on topham-controller as a stateful services controller.
 
-* [Concourse CI](https://ci-ohio.starkandwayne.com/teams/cfcommunity/pipelines/eden)
-* Pull requests will be automatically compiled and tested (see `test-pr` job)
-* Discussions and CI notifications at [#eden channel](https://openservicebrokerapi.slack.com/messages/C6Y5A2N8Z/) on http://slack.openservicebrokerapi.org/
+Provides a CF-like workflow (provision/bind/unbind/deprovision with no state stored on your machine), minus the CF.
+
 
 ## Installation
 
-For Ubuntu/Debian:
-
 ```
-wget -q -O - https://raw.githubusercontent.com/starkandwayne/homebrew-cf/master/public.key | apt-key add -
-echo "deb http://apt.starkandwayne.com stable main" | tee /etc/apt/sources.list.d/starkandwayne.list
-apt-get update
-apt-get install eden
-```
-
-For Mac OS using Homebrew:
-
-```
-brew install starkandwayne/cf/eden
-```
-
-From source using Golang:
-
-```
-go get -u github.com/starkandwayne/eden
+go get -u gopkg.in/pivotal-cf-experimental/eden.spike-services-controller-client
 ```
 
 
 ## Usage
 
-Use environment variables to target an Open Service Broker API:
+Use environment variables to target your topham-controller server:
 
 ```
-export SB_BROKER_URL=https://mybroker.com
+export SB_BROKER_URL=https://topham-controller.com
 export SB_BROKER_USERNAME=username
 export SB_BROKER_PASSWORD=password
 ```
@@ -59,18 +41,3 @@ To view the credentials for your binding:
 ```
 eden credentials
 ```
-
-To extract a single credentials, say a fully formed `uri`, you can use `eden credentials --attribute uri`:
-
-For example, to provision a PostgreSQL service, generate bindings, and use them immediately with `psql`:
-
-```
-export SB_INSTANCE=pg1
-eden provision -s postgresql96
-eden bind
-psql `eden creds -a uri`
-```
-
-### CLI flags and environment variables
-
-In addition to using env vars, you can use CLI flags. See `eden -h` and `eden <command> -h` for more details.
