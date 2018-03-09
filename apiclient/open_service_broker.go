@@ -9,8 +9,8 @@ import (
 	"net/http"
 
 	"github.com/hashicorp/errwrap"
+	edenstore "github.com/pivotal-cf-experimental/eden/store"
 	"github.com/pivotal-cf/brokerapi"
-	edenstore "github.com/starkandwayne/eden/store"
 )
 
 // OpenServiceBroker is the client struct for connecting to remote Open Service Broker API

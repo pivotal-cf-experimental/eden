@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/errwrap"
-	"github.com/starkandwayne/eden/apiclient"
+	"github.com/pivotal-cf-experimental/eden/apiclient"
 )
 
 // CredentialsOpts represents the 'credentials' command

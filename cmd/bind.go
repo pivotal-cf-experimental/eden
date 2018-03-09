@@ -5,7 +5,7 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/pborman/uuid"
-	"github.com/starkandwayne/eden/apiclient"
+	"github.com/pivotal-cf-experimental/eden/apiclient"
 )
 
 // BindOpts represents the 'bind' command

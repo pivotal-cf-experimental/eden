@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/errwrap"
-	"github.com/starkandwayne/eden/apiclient"
+	"github.com/pivotal-cf-experimental/eden/apiclient"
 )
 
 // UnbindOpts represents the 'unbind' command

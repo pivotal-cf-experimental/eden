@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/pivotal-cf/brokerapi"
-	"github.com/starkandwayne/eden/apiclient"
+	"github.com/pivotal-cf-experimental/eden/apiclient"
 )
 
 // ProvisionOpts represents the 'provision' command

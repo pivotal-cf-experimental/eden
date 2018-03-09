@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/jessevdk/go-flags"
-	edencmd "github.com/starkandwayne/eden/cmd"
+	edencmd "github.com/pivotal-cf-experimental/eden/cmd"
 )
 
 var Version = ""

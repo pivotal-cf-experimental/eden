@@ -5,8 +5,8 @@ import (
 	"os"
 
 	boshtbl "github.com/cloudfoundry/bosh-cli/ui/table"
-	"github.com/starkandwayne/eden/apiclient"
-	edenstore "github.com/starkandwayne/eden/store"
+	"github.com/pivotal-cf-experimental/eden/apiclient"
+	edenstore "github.com/pivotal-cf-experimental/eden/store"
 )
 
 // ServicesOpts represents the 'services' command

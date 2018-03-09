@@ -3,7 +3,7 @@ package cmd
 import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
-	edenstore "github.com/starkandwayne/eden/store"
+	edenstore "github.com/pivotal-cf-experimental/eden/store"
 )
 
 // InstanceOpts describes a target service instance

@@ -5,7 +5,7 @@ import (
 	"os"
 
 	boshtbl "github.com/cloudfoundry/bosh-cli/ui/table"
-	"github.com/starkandwayne/eden/apiclient"
+	"github.com/pivotal-cf-experimental/eden/apiclient"
 )
 
 // CatalogOpts represents the 'catalog' command
