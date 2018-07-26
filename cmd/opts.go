@@ -19,6 +19,17 @@ type BrokerOpts struct {
 	APIVersion      string `long:"api-version"   description:"API version request to pass to backend broker" env:"SB_BROKER_API_VERSION" default:"2.13"`
 }
 
+type RegisterPlatformOpts struct {
+	APIUrl string `long:"url"           description:"Platform URL"      required:"true"`
+	Token  string `long:"url"           description:"Platform URL"      required:"true"`
+}
+
+type RegisterBrokerOpts struct {
+	BrokerURL string `long:"url"           description:"Open Service Broker URL" required:"true"`
+	Username  string `long:"username"      description:"username"                required:"true"`
+	Password  string `long:"password"      description:"password"                required:"true"`
+}
+
 // EdenOpts describes the flags/options for the CLI
 type EdenOpts struct {
 	Version bool `short:"v" long:"version" description:"Show version"`
@@ -43,6 +54,10 @@ type EdenOpts struct {
 	Services    ServicesOpts    `command:"services" alias:"s" description:"List service instances (stored in config file)"`
 	Credentials CredentialsOpts `command:"credentials" alias:"creds" alias:"c" description:"Display binding credentials (stored in config file)"`
 	Rename      RenameOpts      `command:"rename" description:"Rename service instance (stored in config file)"`
+
+	//Svc
+	RegisterPlatform RegisterPlatformOpts `command:"register-platform" alias:"rp" description:"register a new platform into svc"`
+	RegisterBroker   RegisterBrokerOpts   `command:"register-broker" alias:"rp" description:"register a broker into svc"`
 }
 
 // Opts carries all the user provided options (from flags or env vars)
